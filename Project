@@ -1,0 +1,122 @@
+class FSA {
+  constructor() {
+    let currentState = '';
+    let arrayOfStates = [];
+
+    //nextState(input: string): returns this
+    this.nextState = function(input) {
+      if(currentState === '') {
+        return this;
+      }
+      let match = currentState.nextState(input);
+      let filteredArr = arrayOfStates.filter(x => Obj.keys(x)[0] === match);
+      if(filteredArr.length === 1) {
+        currentState = filteredArr[0];
+      }
+      return this;
+    }
+    //type Transition = { [key: string]: string }
+    //createState(stateName: string, transitions: Transition[]): returns this
+    this.createState = function(stateName, transitions) {
+      let newState = new State();
+      newState.setName(stateName);
+      for(let i = 0; i < transitions.length; ++i) {
+        let trans = transitions[i];
+        let key = Object.keys(trans)[0];
+        let val = lib220.getProperty(trans, key).value;
+        newState.addTransition(key, val);
+      }
+      let filterAOS = arrayOfStates.filter(x => x.getName() === stateName);
+      if(arrayOfStates.length === 0) {
+        currentState = newState;
+      }
+      else if(filterAOS.length === 1) {
+        let val = arrayOfStates.indexOf(filterAOS[0]);
+        arrayOfStates[val] = newState;
+      }
+      else {
+        arrayOfStates.push(newState);
+      }
+      return this;
+    }
+    //getStateDescription(): string
+    this.getStateDescription = function() {
+      return currentState.getName();
+    }
+    //createMemento(): Memento
+    this.createMemento = function() {
+      let newMem = new Memento();
+      if(currentState === '') {
+        newMem.storeState(undefined);
+        return newMem;
+      }
+      newMem.storeState(currentState);
+      return newMem;
+    }
+    //restoreMemento(m: Memento): returns this
+    this.restoreMemento = function(m) {
+      currentState = m.getState();
+      return this;
+    }
+    class Memento {
+      constructor() {
+        let state = '';
+        //storeState(s: State)
+        this.storeState = function(s) {
+          state = s;
+          return this;
+        }
+        //getState(): State
+        this.getState = function() {
+          return state;
+        }
+      }
+    }
+    class State {
+      constructor() {
+        let name = '';
+        let transitions = [];
+
+        //setName(s: string): returns this
+        this.setName = function(s) {
+          name = s;
+          return this;
+        }
+        //nextState(s: string): string
+        this.nextState = function(s) {
+          let filterTrans = transitions.filter(x => Object.keys(x)[0] === s);
+          if(filterTrans.length === 0) {
+            return this;
+          }
+          else if(filterTrans.length > 1) {
+            return Object.values(filterTrans[Math.floor(Math.random() * array.length)])[0];
+          }
+          return Object.values(filterTrans[0])[0];
+        }
+        //addTransition(s1: string, s2: string)
+        this.addTransition = function(s1, s2) {
+          transitions.push({s1,s2});
+          return this;
+        }
+        //getName(): string
+        this.getName = function(){
+          return name;
+        }
+      }
+    }
+  }
+}
+
+//testing
+
+// let myMachine = new FSA()
+// .createState("delicates, low", [{"Mode button pressed":"normal, low"},
+// {"Temp button pressed": "delicates, medium"}])
+// .createState("normal, low", [{"Mode button pressed":"delicates, low"},
+// {"Temp button pressed": "normal, medium"}]))
+// .createState("delicates, medium", [{"Mode button pressed":"normal, medium"},
+//  {"Temp button pressed": "delicates, low"}]))
+// .createState("normal, medium", [{"Mode button pressed":"delicates, medium"},
+//  {"Temp button pressed": "normal, high"}]))
+// .createState("normal, high", [{"Mode button pressed":"delicates, medium"},
+// {"Temp button pressed": "normal, low"}]));
